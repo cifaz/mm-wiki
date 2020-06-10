@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
+	"github.com/satori/go.uuid"
 )
 
 type PageController struct {
@@ -291,15 +292,51 @@ func (this *PageController) Modify() {
 func (this *PageController) Display() {
 
 	documentId := this.GetString("document_id", "")
-	if documentId == "" {
+	shareId := this.Ctx.Input.Param(":shareid")
+
+	if shareId == "" && documentId == "" {
 		this.ViewError("文档未找到！")
 	}
 
-	document, err := models.DocumentModel.GetDocumentByDocumentId(documentId)
+	var err error
+	var document map[string]string
+	if documentId != "" {
+		document, err = models.DocumentModel.GetDocumentByDocumentId(documentId)
+
+		oldShareId := document["share_id"]
+		if oldShareId == "" {
+			// 创建分享链接
+			uuid := uuid.NewV4()
+			newShareId := uuid.String()
+			newShareId = strings.Replace(newShareId, "-", "", -1)
+			document["share_id"] = newShareId
+
+			updateDoc := map[string]interface{}{
+				"share_id": newShareId,
+			}
+
+			if this.UserId != "" {
+				updateDoc["edit_user_id"] = this.UserId
+			}
+
+			_, err := models.DocumentModel.Update(documentId, updateDoc, "创建分享链接")
+
+			if err != nil {
+				this.ErrorLog("创建分享链接失败：" + err.Error())
+				this.ViewError("创建分享链接失败！")
+			}
+		}
+
+	} else if shareId != "" {
+		document, err = models.DocumentModel.GetDocumentByShareId(shareId)
+		documentId = document["document_id"]
+	}
+
 	if err != nil {
 		this.ErrorLog("查找文档 " + documentId + " 失败：" + err.Error())
 		this.ViewError("查找文档失败！")
 	}
+
 	if len(document) == 0 {
 		this.ViewError("文档不存在！")
 	}

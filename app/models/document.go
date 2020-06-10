@@ -40,6 +40,21 @@ func (d *Document) GetDocumentByDocumentId(documentId string) (document map[stri
 	return
 }
 
+// 通过分享ID获取文档信息
+func (d *Document) GetDocumentByShareId(shareId string) (document map[string]string, err error) {
+	db := G.DB()
+	var rs *mysql.ResultSet
+	rs, err = db.Query(db.AR().From(Table_Document_Name).Where(map[string]interface{}{
+		"share_id":  shareId,
+		"is_delete": Document_Delete_False,
+	}))
+	if err != nil {
+		return
+	}
+	document = rs.Row()
+	return
+}
+
 // get documents by parent_id
 func (d *Document) GetDocumentsByParentId(parentId string) (documents []map[string]string, err error) {
 	db := G.DB()
@@ -298,21 +313,26 @@ func (d *Document) Update(documentId string, documentValue map[string]interface{
 	}
 	id = rs.LastInsertId
 
-	// update document log
-	go func(editUserId string, documentId string, comment string) {
-		_, err := LogDocumentModel.UpdateAction(editUserId, documentId, comment)
-		if err != nil {
-			logs.Error("update document add log err=%s", err.Error())
-		}
-	}(documentValue["edit_user_id"].(string), documentId, comment)
+	if documentValue["edit_user_id"] != nil && documentValue["edit_user_id"] != "" {
+		// update document log
+		go func(editUserId string, documentId string, comment string) {
+			_, err := LogDocumentModel.UpdateAction(editUserId, documentId, comment)
+			if err != nil {
+				logs.Error("update document add log err=%s", err.Error())
+			}
+		}(documentValue["edit_user_id"].(string), documentId, comment)
 
-	// follow document
-	go func(editUserId string, documentId string) {
-		_, err := FollowModel.CreateAutoFollowDocument(editUserId, documentId)
-		if err != nil {
-			logs.Error("follow document err=%s", err.Error())
-		}
-	}(documentValue["edit_user_id"].(string), documentId)
+		// follow document
+		go func(editUserId string, documentId string) {
+			_, err := FollowModel.CreateAutoFollowDocument(editUserId, documentId)
+			if err != nil {
+				logs.Error("follow document err=%s", err.Error())
+			}
+		}(documentValue["edit_user_id"].(string), documentId)
+	} else {
+		println("修改文档时，没有当前登录用户ID， 不能创建更新日志及关注")
+	}
+
 	return
 }
 

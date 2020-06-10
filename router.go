@@ -18,6 +18,8 @@ func initRouter() {
 	// router
 	beego.BConfig.WebConfig.AutoRender = false
 	beego.BConfig.RouterCaseSensitive = false
+	// result类型需要
+	beego.BConfig.CopyRequestBody = true
 
 	beego.Router("/", &controllers.MainController{}, "*:Index")
 	beego.Router("/author", &controllers.AuthorController{}, "*:Index")
@@ -31,6 +33,7 @@ func initRouter() {
 	beego.AutoRouter(&controllers.PageController{})
 	beego.AutoRouter(&controllers.ImageController{})
 	beego.AutoRouter(&controllers.AttachmentController{})
+	beego.Router("/s/:shareId", &controllers.PageController{}, "*:Display")
 
 	systemNamespace := beego.NewNamespace("/system",
 		beego.NSAutoRouter(&systemControllers.MainController{}),

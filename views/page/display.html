@@ -22,6 +22,13 @@
                         <i class="fa fa-edit fa-fw"></i>
                         修改于 {{dateFormat $document.update_time "Y/m/d H:i:s"}} By  {{$editUser.username}}（{{$editUser.given_name}}）
                     </p>
+                    <p>
+                        <label>
+                            <input class="input-share" value="{{$document.share_id}}" data-share-id="{{$document.share_id}}" />
+                            <button class="btn-share-copy">复制链接</button>
+                            <span class="msg-share"></span>
+                        </label>
+                    </p>
                     <hr style="margin: 0">
                     <textarea style="display:none;">{{$pageContent}}</textarea>
                 </div>
@@ -80,10 +87,82 @@
             }
         });
 
+        // 处理分享链接
+        let val = $(".input-share").val();
+        if (val) {
+            console.log(window.location)
+            $(".input-share").val(window.location.origin + "/s/" + val);
+        }
+
+        $(".btn-share-copy").click(function () {
+            $(".input-share").select();
+            document.execCommand("Copy");
+            $(".msg-share").html("复制成功，可使用ctrl + v粘贴");
+            // 10秒后清除提示
+            setTimeout(function () {
+                $(".msg-share").html("");
+            }, 10000)
+        });
+
         $('#document-qrcode').qrcode({
             width: 120,
             height: 120,
             text: window.location.href
         });
+
+
+        function copyToClipboard(txt) {
+            if (window.clipboardData) {
+                window.clipboardData.clearData();
+                clipboardData.setData("Text", txt);
+                alert("复制成功！");
+
+            } else if (navigator.userAgent.indexOf("Opera") != -1) {
+                window.location = txt;
+            } else if (window.netscape) {
+                try {
+                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+                } catch (e) {
+                    alert("被浏览器拒绝！\n请在浏览器地址栏输入'about:config'并回车\n然后将 'signed.applets.codebase_principal_support'设置为'true'");
+                }
+                var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+                if (!clip)
+                    return;
+                var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+                if (!trans)
+                    return;
+                trans.addDataFlavor("text/unicode");
+                var str = new Object();
+                var len = new Object();
+                var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+                var copytext = txt;
+                str.data = copytext;
+                trans.setTransferData("text/unicode", str, copytext.length * 2);
+                var clipid = Components.interfaces.nsIClipboard;
+                if (!clip)
+                    return false;
+                clip.setData(trans, null, clipid.kGlobalClipboard);
+                alert("复制成功！");
+            }
+        }
     });
 </script>
+<style>
+    .input-share {
+        width: 334px;
+    }
+
+    .btn-share-copy {
+        height: 24px;
+        line-height: 24px;
+        outline: none;
+        border: none;
+        font-weight: normal;
+        position: relative;
+        top: 2px;
+    }
+
+    .btn-share-copy:hover {
+        color: #337ab7;
+    }
+</style>
