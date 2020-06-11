@@ -177,6 +177,7 @@ CREATE TABLE `mw_log_document` (
   `document_id` int(10) NOT NULL DEFAULT '0' COMMENT '文档id',
   `space_id` int(10) NOT NULL DEFAULT '0' COMMENT '空间id',
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
+  `share_id` varchar(64) DEFAULT '' COMMENT '文档分享地址字符串',
   `action` tinyint(3) NOT NULL DEFAULT '1' COMMENT '动作 1 创建 2 修改 3 删除',
   `comment` varchar(255) NOT NULL DEFAULT '' COMMENT '备注信息',
   `create_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',

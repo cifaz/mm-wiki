@@ -162,6 +162,12 @@ func (up *Upgrade) v013ToV018() error {
 
 // upgrade v0.1.8 ~ v0.2.1
 func (up *Upgrade) v018ToV021() error {
+	db := G.DB()
+	_, err := db.Exec(db.AR().Raw("alter table mw_document add share_id varchar(64) comment '文档分享地址字符串'"))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
