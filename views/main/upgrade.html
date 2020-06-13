@@ -1,0 +1,148 @@
+<div class="container-fluid">
+    <div class="panel-body">
+        <p class="check-version-msg"></p>
+        <p class="upgrade-important" style="display: none">当前有非常重要的升级, 请尽快升级!!!</p>
+        <p>
+            <strong>当前版本号: </strong>
+            <a href="https://github.com/phachon/mm-wiki/releases"
+               target="_blank" class="current-version">{{.version}}</a>
+        </p>
+        <p class="new-version-box">
+            <strong>新版本号: </strong>
+            <a href="https://github.com/phachon/mm-wiki/releases"
+               target="_blank" class="new-version">加载中</a>
+        </p>
+        <div class="new-version-box" >
+            <strong>升级内容: </strong>
+            <div class="version-content" id="version-box">
+                <textarea style="display:none;"># 要 ### 要地</textarea>
+            </div>
+        </div>
+        <div class="new-version-box">
+            <strong>下载地址: </strong>
+            <div class="upgrade-content version-down">加载中</div>
+        </div>
+        <p><strong>GitHub升级地址:</strong> <a href="https://github.com/phachon/mm-wiki/releases"
+                                           target="_blank">{{.newVersionUpgrade.github}}</a></p>
+    </div>
+</div>
+<script type="text/javascript" src="/static/plugins/editor.md/editormd.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/marked.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/prettify.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/raphael.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/underscore.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/sequence-diagram.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/flowchart.min.js"></script>
+<script type="text/javascript" src="/static/plugins/editor.md/lib/jquery.flowchart.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".new-version-box").hide();
+        $(".check-version-msg").html("向服务器检查中...");
+
+        $.post("/main/CheckVersionUpgrade", function (data) {
+
+            // 默认全部展示
+            parseContent(data);
+            if (data && data.success) {
+                // TO
+            } else if (data.code === 10) {
+                var description = data.description || "检查版本号失败";
+                $(".check-version-msg").html(description);
+            } else {
+                var description = data.description || "检查版本号失败";
+                $(".check-version-msg").html(description +  " 可能是github不稳定或连接限制");
+            }
+        });
+
+        function parseContent(data) {
+            if (data && data.success) {
+                $(".new-version-box").show();
+            }
+
+            var dataContent = data.data;
+            if (dataContent) {
+                $(".new-version").html(dataContent.newVersion);
+
+                var versionContent = dataContent.description;
+                $(".version-content").find("textarea").text(versionContent);
+
+                var downloadUrl = dataContent.downloadUrl;
+                if (downloadUrl) {
+                    var $ul = $("<ul>");
+                    for (let i = 0; i < downloadUrl.length; i++) {
+                        var downInfo = downloadUrl[i];
+                        var li = $("<li>").addClass("version-down-li");
+
+                        var $adown = $("<a>").attr({
+                            "href": downInfo.url,
+                            "target": "_blank",
+                        }).appendTo(li);
+
+                        $("<div>").addClass("version-down-name").html(downInfo.name).appendTo($adown);
+                        $ul.append(li)
+                    }
+
+                    $(".version-down").empty().append($ul);
+                }
+            }
+
+            parseMd();
+        }
+
+        // 解析markdown格式
+        function parseMd() {
+            editormd.katexURL = {
+                js  : "/static/plugins/editor.md/lib/katex/katex.min",
+                css : "/static/plugins/editor.md/lib/katex/katex.min"
+            };
+            console.log('md 解析')
+            editormd.markdownToHTML("version-box", {
+                path : '/static/plugins/editor.md/lib/',
+                htmlDecode      : "style",  // you can filter tags decode
+                emoji           : true,
+                taskList        : true,
+                tex             : true,  // 默认不解析
+                flowChart       : true,  // 默认不解析
+                sequenceDiagram : true,  // 默认不解析
+            });
+        }
+
+
+        // end
+    })
+</script>
+
+<style>
+    .panel-body>p, .panel-body>div {
+        margin-bottom: 10px;
+    }
+
+    .check-version-msg, .upgrade-important {
+        font-weight: bolder;
+        font-size: 14px;
+        color: red;
+    }
+
+    .upgrade-content, .version-content {
+        position: relative;
+        width: 80%;
+        left: 65px;
+        top: -15px;
+    }
+
+    ul, li {
+        outline: none;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+    }
+
+    .version-down li {
+        line-height: 20px;
+    }
+
+    .version-down li a:hover {
+        color: red;
+    }
+</style>

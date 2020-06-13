@@ -143,6 +143,23 @@ func (this *MainController) About() {
 	this.viewLayout("main/about", "default")
 }
 
+// 升级检测
+func (this *MainController) Upgrade() {
+	this.viewLayout("main/upgrade", "default")
+}
+
+// 主动检查是否有版本升级
+func (this *MainController) CheckVersionUpgrade() {
+	versionResult := utils.GetHasNewVersion()
+
+	utils.VersionUpgrade["newVersion"] = versionResult.Data.NewVersion
+	utils.VersionUpgrade["description"] = versionResult.Data.Description
+	utils.VersionUpgrade["downloadUrl"] = versionResult.Data.DownloadUrl
+
+	this.Data["json"] = versionResult
+	this.ServeJSON()
+}
+
 // 搜索，支持根据标题和内容搜索
 func (this *MainController) Search() {
 

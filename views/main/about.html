@@ -4,7 +4,9 @@
         <div class="page-header center">
             <img src="/static/images/logo_sm.png" style="height: 70px">
         </div>
-        <p><strong>MM-Wiki: <a href="https://github.com/phachon/mm-wiki/releases" target="_blank">{{.version}}</a></strong></p>
+        <p><strong>MM-Wiki: <a href="https://github.com/phachon/mm-wiki/releases" target="_blank">{{.version}}</a></strong>
+            <button class="check-version-btn">查检新版本</button><span class="check-version-msg"></span>
+        </p>
         <p><strong>Author: <a href="https://github.com/phachon" target="_blank">phachon</a></strong></p>
         <p><strong>Link: <a href="https://github.com/phachon/mm-wiki" target="_blank">https://github.com/phachon/mm-wiki</a></strong></p>
         <p><strong>Copyright (c) {{.copyright}}</strong></p>
@@ -12,3 +14,33 @@
     </div>
 </div>
 </div>
+
+<script>
+    $(function () {
+        $(".check-version-msg").empty();
+        $(".check-version-btn").click(function () {
+            $(".check-version-msg").empty();
+            $.post("/main/CheckVersionUpgrade", function (data) {
+                if (data && data.success) {
+                    $(".check-version-msg").html("有新的版本号: " + data.newVersion)
+                } else if (data.code === 10) {
+                    $(".check-version-msg").html(data.description)
+                } else {
+                    $(".check-version-msg").html("检查失败: " + data.description + ", 可能是github不稳定或连接限制")
+                }
+            })
+        });
+    })
+</script>
+
+<style>
+    .check-version-btn {
+        border: none;
+        outline: none;
+        background: white;
+    }
+
+    .check-version-msg {
+        color: red;
+    }
+</style>

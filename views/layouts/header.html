@@ -34,6 +34,17 @@
                     </div>
                 </form>
                 <ul class="nav navbar-nav navbar-right">
+                    <!-- 强制性提示 -->
+                    {{if eq .newVersionUpgrade.hasVewVersion true}}
+                        <li name="version-upgrade" data-link="/main/upgrade" style="height: 100%;
+                                color: red;
+                                padding: 15px 15px;
+                                line-height: 20px;">
+
+                            有新的版本:{{.newVersionUpgrade.newVersion}}
+                        </li>
+                    {{end}}
+
                     <li class="dropdown">
                         <a type="button" data-toggle="web-popover" data-placement="bottom">
                             <span class="fa fa-question-circle"></span>&nbsp;帮助
@@ -43,6 +54,7 @@
                             <ul class="dropdown-menu webui-popover-menu">
                                 <li><a href="https://github.com/phachon/mm-wiki/issues" target="_blank"><span class="fa fa-question-circle"></span>&nbsp;问题反馈</a></li>
                                 <li><a href="https://github.com/phachon/mm-wiki" target="_blank"><span class="fa fa-book"></span>&nbsp;在线文档</a></li>
+                                <li><a name="version-upgrade" data-link="/main/upgrade"><span class="fa fa-send"></span>&nbsp;检查版本</a></li>
                                 <li><a name="about" data-link="/main/about"><span class="fa fa-send"></span>&nbsp;关于软件</a></li>
                             </ul>
                         </div>
@@ -96,4 +108,6 @@
     }
     Layers.bindIframe("a[name='repass']", "修改密码", "325px", "800px");
     Layers.bindIframe("a[name='about']", "关于MM-Wiki", "338px", "600px");
+    Layers.bindIframe("li[name='version-upgrade']", "有新的版本升级", "338px", "600px");
+    Layers.bindIframe("a[name='version-upgrade']", "有新的版本升级", "338px", "600px");
 </script>

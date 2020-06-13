@@ -53,12 +53,18 @@ func init() {
 	initFlag()
 	poster()
 	initConfig()
+	initCheckVersion()
 	initDB()
 	checkUpgrade()
 	initDocumentDir()
 	initSearch()
 	initWork()
 	StartTime = time.Now().Unix()
+}
+
+// init check upgrade version
+func initCheckVersion() {
+	utils.StartCheckVersion()
 }
 
 // init flag

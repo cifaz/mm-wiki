@@ -151,6 +151,10 @@ func (this *TemplateController) ViewLayout(viewName, layout string) {
 	this.Layout = layout + ".html"
 	this.TplName = viewName + ".html"
 	this.Data["title"] = "MM-Wiki"
+	// 有新版时强制提示 {是否有新版本, 是否是重要版本, 更新主要内容, 当前版本号, 新版本号, 下载链接, GITHUB地址}
+	upgrade := utils.VersionUpgrade
+	upgrade["currVersion"] = app.Version
+	this.Data["newVersionUpgrade"] = upgrade
 	this.Data["copyright"] = app.CopyRight
 	this.Render()
 }
