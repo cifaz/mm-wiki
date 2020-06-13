@@ -18,8 +18,10 @@
 <script>
     $(function () {
         $(".check-version-msg").empty();
+
         $(".check-version-btn").click(function () {
             $(".check-version-msg").empty();
+            $(".check-version-msg").html("检查中...")
             $.post("/main/CheckVersionUpgrade", function (data) {
                 if (data && data.success) {
                     $(".check-version-msg").html("有新的版本号: " + data.newVersion)
